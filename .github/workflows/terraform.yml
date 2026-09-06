@@ -22,45 +22,37 @@ jobs:
       TF_VAR_compartment_ocid: ${{ secrets.OCI_COMPARTMENT_OCID }}
 
       # OCI Backend Authentication
-      OCI_TENANCY_OCID: ${{ secrets.OCI_TENANCY_OCID }}
-      OCI_USER_OCID: ${{ secrets.OCI_USER_OCID }}
-      OCI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
-      OCI_REGION: ${{ secrets.OCI_REGION }}
-      OCI_PRIVATE_KEY_PATH: /home/runner/.oci/oci_api_key.pem
+      OCI_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
+      OCI_user_ocid: ${{ secrets.OCI_USER_OCID }}
+      OCI_fingerprint: ${{ secrets.OCI_FINGERPRINT }}
+      OCI_private_key_path: /home/runner/.oci/oci_api_key.pem
+      OCI_region: ${{ secrets.OCI_REGION }}
 
     steps:
 
-      # Step 1: Checkout Repository
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # Step 2: Install Terraform
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      # Step 3: Create OCI Private Key File
       - name: Configure OCI API Key
         run: |
-          mkdir -p ~/.oci
-          printf '%s' "${{ secrets.OCI_PRIVATE_KEY }}" > ~/.oci/oci_api_key.pem
-          chmod 600 ~/.oci/oci_api_key.pem
+          mkdir -p /home/runner/.oci
+          printf '%s' "$OCI_PRIVATE_KEY" > /home/runner/.oci/oci_api_key.pem
+          chmod 600 /home/runner/.oci/oci_api_key.pem
 
-      # Step 4: Terraform Format Check
       - name: Terraform Format Check
         run: terraform fmt -check
 
-      # Step 5: Terraform Init
       - name: Terraform Init
-        run: terraform init
+        run: terraform init -reconfigure
 
-      # Step 6: Terraform Validate
       - name: Terraform Validate
         run: terraform validate
 
-      # Step 7: Terraform Plan
       - name: Terraform Plan
         run: terraform plan
 
-      # Step 8: Terraform Apply
       - name: Terraform Apply
         run: terraform apply -auto-approve
