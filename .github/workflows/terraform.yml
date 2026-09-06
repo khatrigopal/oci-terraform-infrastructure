@@ -5,50 +5,56 @@ on:
 
 jobs:
   terraform:
-    name: Terraform
+    name: OCI Terraform Infrastructure
     runs-on: ubuntu-latest
 
     defaults:
       run:
         working-directory: ./terraform
 
+    env:
+      # Terraform Provider Variables
+      TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
+      TF_VAR_user_ocid: ${{ secrets.OCI_USER_OCID }}
+      TF_VAR_fingerprint: ${{ secrets.OCI_FINGERPRINT }}
+      TF_VAR_private_key: ${{ secrets.OCI_PRIVATE_KEY }}
+      TF_VAR_region: ${{ secrets.OCI_REGION }}
+      TF_VAR_compartment_ocid: ${{ secrets.OCI_COMPARTMENT_OCID }}
+
+      # OCI Backend Authentication
+      OCI_TENANCY: ${{ secrets.OCI_TENANCY_OCID }}
+      OCI_USER: ${{ secrets.OCI_USER_OCID }}
+      OCI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
+      OCI_REGION: ${{ secrets.OCI_REGION }}
+
     steps:
 
+      # Step 1: Checkout Source Code
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      # Step 2: Install Terraform
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: latest
 
+      # Step 3: Terraform Format Check
       - name: Terraform Format Check
         run: terraform fmt -check
 
+      # Step 4: Terraform Init
       - name: Terraform Init
-        env:
-          TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
-          TF_VAR_user_ocid: ${{ secrets.OCI_USER_OCID }}
-          TF_VAR_fingerprint: ${{ secrets.OCI_FINGERPRINT }}
-          TF_VAR_private_key: ${{ secrets.OCI_PRIVATE_KEY }}
-          TF_VAR_region: ${{ secrets.OCI_REGION }}
         run: terraform init
 
+      # Step 5: Terraform Validate
       - name: Terraform Validate
         run: terraform validate
 
+      # Step 6: Terraform Plan
       - name: Terraform Plan
-        env:
-          TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
-          TF_VAR_user_ocid: ${{ secrets.OCI_USER_OCID }}
-          TF_VAR_fingerprint: ${{ secrets.OCI_FINGERPRINT }}
-          TF_VAR_private_key: ${{ secrets.OCI_PRIVATE_KEY }}
-          TF_VAR_region: ${{ secrets.OCI_REGION }}
         run: terraform plan
 
+      # Step 7: Terraform Apply
       - name: Terraform Apply
-        env:
-          TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
-          TF_VAR_user_ocid: ${{ secrets.OCI_USER_OCID }}
-          TF_VAR_fingerprint: ${{ secrets.OCI_FINGERPRINT }}
-          TF_VAR_private_key: ${{ secrets.OCI_PRIVATE_KEY }}
-          TF_VAR_region: ${{ secrets.OCI_REGION }}
         run: terraform apply -auto-approve
