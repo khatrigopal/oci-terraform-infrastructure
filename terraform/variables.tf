@@ -13,13 +13,11 @@ variable "user_ocid" {
 variable "fingerprint" {
   description = "OCI API Key Fingerprint"
   type        = string
-  sensitive   = true
 }
 
-variable "private_key" {
-  description = "OCI API Private Key"
+variable "private_key_path" {
+  description = "OCI API Private Key Path"
   type        = string
-  sensitive   = true
 }
 
 variable "region" {
